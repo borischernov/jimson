@@ -45,6 +45,7 @@ module Jimson
     # * :host - the hostname or ip to bind to
     # * :port - the port to listen on
     # * :server - the rack handler to use, e.g. 'webrick' or 'thin'
+    # * :logger - logger instance
     # * :show_errors - true or false, send backtraces in error responses?
     #
     # Remaining options are forwarded to the underlying Rack server.
@@ -63,6 +64,7 @@ module Jimson
       @host = opts.delete(:host) || '0.0.0.0'
       @port = opts.delete(:port) || 8999
       @show_errors = opts.delete(:show_errors) || false 
+      @logger = opts.delete(:logger)
       @opts = opts
     end
 
@@ -71,7 +73,7 @@ module Jimson
     #
     def start
       Rack::Server.start(opts.merge(
-        :app    => self,
+        :app    => @logger ? Rack::CommonLogger(self, @logger) : self,
         :Host   => @host,
         :Port   => @port
       ))
