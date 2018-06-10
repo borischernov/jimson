@@ -73,7 +73,7 @@ module Jimson
     #
     def start
       Rack::Server.start(opts.merge(
-        :app    => @logger ? Rack::CommonLogger(self, @logger) : self,
+        :app    => @logger ? Rack::CommonLogger.new(self, @logger) : self,
         :Host   => @host,
         :Port   => @port
       ))
