@@ -93,6 +93,7 @@ module Jimson
     def process(content)
       begin
         request = parse_request(content)
+        @logger.debug("Request: #{request.inspect}") if @logger
         if request.is_a?(Array)
           raise Server::Error::InvalidRequest.new if request.empty?
           response = request.map { |req| handle_request(req) }
@@ -100,15 +101,20 @@ module Jimson
           response = handle_request(request)
         end
       rescue Server::Error::ParseError, Server::Error::InvalidRequest => e
+        @logger.error("#{e}\n#{e.backtrace.join("\n")}") if @logger
         response = error_response(e)
       rescue Server::Error => e
+        @logger.error("#{e}\n#{e.backtrace.join("\n")}") if @logger
         response = error_response(e, request)
       rescue StandardError, Exception => e
+        @logger.error("#{e}\n#{e.backtrace.join("\n")}") if @logger
         response = error_response(Server::Error::InternalError.new(e))
       end
 
       response.compact! if response.is_a?(Array)
-
+      
+      @logger.debug("Response: #{response.inspect}") if @logger
+      
       return nil if response.nil? || (response.respond_to?(:empty?) && response.empty?)
 
       MultiJson.encode(response)
