@@ -101,13 +101,10 @@ module Jimson
           response = handle_request(request)
         end
       rescue Server::Error::ParseError, Server::Error::InvalidRequest => e
-        @logger.error("#{e}\n#{e.backtrace.join("\n")}") if @logger
         response = error_response(e)
       rescue Server::Error => e
-        @logger.error("#{e}\n#{e.backtrace.join("\n")}") if @logger
         response = error_response(e, request)
       rescue StandardError, Exception => e
-        @logger.error("#{e}\n#{e.backtrace.join("\n")}") if @logger
         response = error_response(Server::Error::InternalError.new(e))
       end
 
@@ -175,10 +172,13 @@ module Jimson
       return response 
 
       rescue Server::Error => e
+        @logger.error("#{e}\n#{e.backtrace.join("\n")}") if @logger
         raise e
       rescue ArgumentError
+        @logger.error("#{e}\n#{e.backtrace.join("\n")}") if @logger
         raise Server::Error::InvalidParams.new
       rescue Exception, StandardError => e
+        @logger.error("#{e}\n#{e.backtrace.join("\n")}") if @logger
         raise Server::Error::ApplicationError.new(e, @show_errors)
     end
 
