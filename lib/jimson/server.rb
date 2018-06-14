@@ -129,6 +129,7 @@ module Jimson
           response = create_response(request)
         end
       rescue Server::Error => e
+        @logger.error("#{e}\n#{e.backtrace.join("\n")}") if @logger
         response = error_response(e, request)
       end
 
