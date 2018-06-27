@@ -16,6 +16,7 @@ module Jimson
       @url = url
       URI.parse(@url) # for the sake of validating the url
       @batch = []
+      @logger = opts.delete(:logger)
       @opts = opts
       @namespace = namespace
       @opts[:content_type] = 'application/json'
@@ -45,7 +46,9 @@ module Jimson
         'params'  => args,
         'id'      => self.class.make_id
       })
+      @logger.debug("Request: #{post_data.inspect}") if @logger
       resp = RestClient::Resource.new(@url, @opts).post(post_data)
+      @logger.debug("Response: #{resp.body.inspect}") if @logger
       if resp.nil? || resp.body.nil? || resp.body.empty?
         raise Client::Error::InvalidResponse.new
       end
