@@ -9,7 +9,7 @@ spec = Gem::Specification.new do |s|
   s.platform = Gem::Platform::RUBY
   s.summary = "JSON-RPC 2.0 client and server"
   s.require_path = "lib"
-  s.has_rdoc = false
+  #s.has_rdoc = false
   #s.rdoc_options << '-m' << 'README.rdoc' << '-t' << 'Jimson'
   s.extra_rdoc_files = ["README.md"]
   s.add_dependency("blankslate", "~> 3.1", ">= 3.1.3")
