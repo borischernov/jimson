@@ -174,7 +174,7 @@ module Jimson
       rescue Server::Error => e
         @logger.error("#{e}\n#{e.backtrace.join("\n")}") if @logger
         raise e
-      rescue ArgumentError
+      rescue ArgumentError => e
         @logger.error("#{e}\n#{e.backtrace.join("\n")}") if @logger
         raise Server::Error::InvalidParams.new
       rescue Exception, StandardError => e
