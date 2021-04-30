@@ -91,6 +91,8 @@ module Jimson
     end
 
     def process(content)
+      response = nil
+
       Datadog.tracer.trace('jsonrpc.request') do |span|
         begin
           request = parse_request(content)
