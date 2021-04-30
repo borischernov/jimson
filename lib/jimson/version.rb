@@ -1,3 +1,3 @@
 module Jimson
-  VERSION = '0.11.9'
+  VERSION = '0.12.0'
 end
