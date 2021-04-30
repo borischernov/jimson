@@ -91,21 +91,29 @@ module Jimson
     end
 
     def process(content)
-      begin
-        request = parse_request(content)
-        @logger.debug("Request: #{request.inspect}") if @logger
-        if request.is_a?(Array)
-          raise Server::Error::InvalidRequest.new if request.empty?
-          response = request.map { |req| handle_request(req) }
-        else
-          response = handle_request(request)
+      Datadog.tracer.trace('jsonrpc.request') do |span|
+        begin
+          request = parse_request(content)
+          @logger.debug("Request: #{request.inspect}") if @logger
+          if request.is_a?(Array)
+            raise Server::Error::InvalidRequest.new if request.empty?
+            response = request.map { |req| handle_request(req) }
+          else
+            span.resource = request['method']
+            span.set_tag('request.raw', request)
+            response = handle_request(request)
+            span.set_tag('response.raw', response)
+          end
+        rescue Server::Error::ParseError, Server::Error::InvalidRequest => e
+          response = error_response(e)
+          span.set_error(e)
+        rescue Server::Error => e
+          response = error_response(e, request)
+          span.set_error(e)
+        rescue StandardError, Exception => e
+          response = error_response(Server::Error::InternalError.new(e))
+          span.set_error(e)
         end
-      rescue Server::Error::ParseError, Server::Error::InvalidRequest => e
-        response = error_response(e)
-      rescue Server::Error => e
-        response = error_response(e, request)
-      rescue StandardError, Exception => e
-        response = error_response(Server::Error::InternalError.new(e))
       end
 
       response.compact! if response.is_a?(Array)
