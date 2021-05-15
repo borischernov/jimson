@@ -183,12 +183,18 @@ module Jimson
 
       rescue Server::Error => e
         @logger.error("#{e}\n#{e.backtrace.join("\n")}") if @logger
+        span = Datadog.tracer.active_root_span
+        span.set_error(e) if span
         raise e
       rescue ArgumentError => e
         @logger.error("#{e}\n#{e.backtrace.join("\n")}") if @logger
+        span = Datadog.tracer.active_root_span
+        span.set_error(e) if span
         raise Server::Error::InvalidParams.new
       rescue Exception, StandardError => e
         @logger.error("#{e}\n#{e.backtrace.join("\n")}") if @logger
+        span = Datadog.tracer.active_root_span
+        span.set_error(e) if span
         raise Server::Error::ApplicationError.new(e, @show_errors)
     end
 
